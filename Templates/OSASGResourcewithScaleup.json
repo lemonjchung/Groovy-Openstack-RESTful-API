@@ -1,0 +1,55 @@
+            "#asgname_#asgNo": {
+                "type": "OS::Heat::AutoScalingGroup",
+                "properties": {
+                    "cooldown": #cooldown,
+                    "desired_capacity": #desiredcapacity,
+                    "min_size": #minsize,
+                    "max_size": #maxsize,
+                    "resource": {
+                        "type": "#url/AsgardSubTemplateWithoutKey.yaml",
+                        "properties": {
+  							"flavor": "#flavor",
+                        	"image": "#smiid",
+                            "sec_groups": [#secgroups],
+                            "in_net_id": "#netid",
+            "ext_net_id": "#externalNetwork",
+                            "subnet_id": "#subnetid",
+                        	"az": "#zone",
+                            "region": "#region",
+                            "platform": "#platform",
+                            "tenant": "#tenant",
+                            "app": "#app",
+                            "pool_id": { "Ref" : "#poolid"},
+                            "metadata": {
+                                "metering.stack": {"Ref": "OS::stack_id"},
+                                "metering.AutoScalingGroupName": "#asgname_#asgNo",
+                                "CLOUD_ENVIRONMENT" : "#CLOUD_ENVIRONMENT"
+                           },
+                            "user_data": "while true\\ndo\\necho -e \\"HTTP/1.0 200 OK\\\\r\\\\n\\\\r\\\\n`hostname`\\" | sudo nc -l -p 80\\ndone\\n"
+                        }
+                    }
+                }
+            },
+            "scale_up_policy#asgNo": {
+                "type": "OS::Heat::ScalingPolicy",
+                "properties": {
+                    "adjustment_type": "change_in_capacity",
+                    "auto_scaling_group_id": {
+                        "Ref": "#asgname_#asgNo"
+                    },
+                    "cooldown": 10,
+                    "scaling_adjustment": #scaleupadjustment
+                }
+            },
+            "scale_down_policy#asgNo": {
+                "type": "OS::Heat::ScalingPolicy",
+                "properties": {
+                    "adjustment_type": "change_in_capacity",
+                    "auto_scaling_group_id": {
+                        "Ref": "#asgname_#asgNo"
+                    },
+                    "cooldown": 10,
+                    "scaling_adjustment": -#scaledownadjustment
+                }
+            },
+

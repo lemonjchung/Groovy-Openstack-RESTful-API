@@ -1,0 +1,6 @@
+                        {
+                            "get_attr": [
+                                "scale_up_policy#asgNo",
+                                "alarm_url"
+                            ]
+                        },

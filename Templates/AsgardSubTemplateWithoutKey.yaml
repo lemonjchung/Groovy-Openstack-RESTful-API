@@ -1,0 +1,163 @@
+heat_template_version: 2014-10-16
+description: A load-balancer server added into a HaProxy pool
+parameters:
+  image:
+    type: string
+    description: Image used for servers
+  flavor:
+    type: string
+    description: flavor used by the servers
+    default: windows.small
+  az:
+    type: string
+    description: the availability zone to put the server in
+  sec_groups:
+    type: comma_delimited_list
+    description: the security groups to assign to the server
+  in_net_id:
+    type: string
+    description: UUID of a Neutron internal network
+  ext_net_id:
+    type: string
+    description: UUID of a Neutron internal network
+  subnet_id:
+    type: string
+    description: subnet on which the load balancer will be located
+  pool_id:
+    type: string
+    description: Pool to contact
+  region:
+    label: region
+    type: string
+    description: Three letter designation representing the data center region; Typically based on the airport code of closest airport to data center
+    default: TPA
+  platform:
+    label: platform
+    type: string
+    description: >
+      One letter designation representing the platform where the virtual machine resides
+        - W -> Windows
+        - L -> Linux
+    default: 0
+  tenant:
+    label: tenant
+    type: string
+    description: >
+      Three letter designation representing the tenant
+        CAM - Customer Account Management
+        TXP - Transaction Processing
+        COM - Communications
+        CEP - Complex Event Processing
+    default: 00
+  app:
+    label: app
+    type: string
+    description: >
+      Two letter designation representing the primary role of the virtual machine.
+    default: 00
+  metadata:
+    type: json
+  user_data:
+    type: string
+    description: Server user_data
+resources:
+  randstring:
+    type: OS::Heat::RandomString
+    properties:
+      character_classes: [{"class": lowercase, "min": 5}, ]
+      length: 5
+  server:
+    type: OS::Nova::Server
+    properties:
+      name: {list_join : ["", [{ get_param: region }, { get_param: platform }, { get_param: tenant }, { get_param: app }, {get_resource: randstring}]]}
+      flavor: {get_param: flavor}
+      image: {get_param: image}
+      availability_zone: {get_param: az}
+      metadata: {get_param: metadata}
+      user_data: {get_param: user_data}
+      user_data_format: RAW
+      networks:
+        - port: { get_resource: server_port }
+  member:
+    type: OS::Neutron::PoolMember
+    properties:
+      pool_id: {get_param: pool_id}
+      address: {get_attr: [floating_ip,  floating_ip_address]}
+      protocol_port: 443
+  server_port:
+    type: OS::Neutron::Port
+    properties:
+      security_groups: {get_param: sec_groups}
+      network_id: {get_param: in_net_id}
+      fixed_ips:
+        - subnet_id: {get_param: subnet_id}
+  floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: ext_net_id }
+  floating_ip_assoc:
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: { get_resource: floating_ip }
+      port_id: { get_resource: server_port }
+outputs:
+  param_image:
+    description: Image used for servers
+    value: {get_param: image}
+  param_flavor:
+    description: flavor used by the web servers
+    value: {get_param: flavor}
+  param_az:
+    description: the availability zone to put the server in
+    value: {get_param: az}
+  param_sec_groups:
+    description: the security groups to assign to the server
+    value: {get_param: az}
+  param_in_net_id:
+    description: UUID of a Neutron internal network
+    value: {get_param: in_net_id}
+  param_ext_net_id:
+      description: UUID of a Neutron internal network
+      value: {get_param: ext_net_id}
+  param_subnet_id:
+    description: subnet on which the load balancer will be located
+    value: {get_param: subnet_id}
+  pool_id:
+    description: Pool to contact
+    value: {get_param: pool_id}
+  param_region:
+    description: Three letter designation representing the data center region; Typically based on the airport code of closest airport to data center
+    value: {get_param: region}
+  param_platform:
+    description:  >
+      One letter designation representing the platform where the virtual machine resides
+        - P -> Production
+        - U -> User Acceptance Testing
+        - Q -> Quality Assurance
+        - D -> Development
+        - S -> Stress testing
+        - T -> Test
+    value: {get_param: platform}
+  param_tenant:
+    description: >
+      Three letter designation representing the tenant
+        CAM - Customer Account Management
+        TXP - Transaction Processing
+        COM - Communications
+        CEP - Complex Event Processing
+    value: {get_param: tenant}
+  param_app:
+    description: >
+      Two letter designation representing the primary role of the virtual machine.
+        AU - Authorization
+        SV - Service Internal
+        LO - Log
+        QU - Queue
+        RS - Responsive Web
+    value: {get_param: app}
+  param_metadata:
+    description: metadata
+    value: {get_param: metadata}
+  param_user_data:
+    description: Script to be executed by cloud-init
+    value: {get_param: user_data}

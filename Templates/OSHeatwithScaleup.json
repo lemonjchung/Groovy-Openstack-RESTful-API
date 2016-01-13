@@ -1,0 +1,58 @@
+{
+    "template": {
+        "description": "#description",
+        "resources": {
+            #OSASGResource
+            "#poolid": {
+                "type": "OS::Neutron::LoadBalancer",
+                "properties": {
+                    "protocol_port": #networkport,
+                    "pool_id": "#poolid"
+                }
+            },
+            "cpu_alarm_high": {
+                "type": "OS::Ceilometer::Alarm",
+                "properties": {
+                    "meter_name": "cpu_util",
+                    "description": "Scale-up if the average CPU > #alarmupthreshold% for #alarmupperiod seconds",
+                    "comparison_operator": "gt",
+                    "statistic": "avg",
+                    "period": #alarmupperiod,
+                    "evaluation_periods": 1,
+                    "threshold": #alarmupthreshold,
+                    "alarm_actions": [
+                    #OSAlarmUpAttribute
+                    ],
+                    "matching_metadata": {
+                        "metadata.user_metadata.stack": {
+                            "Ref": "OS::stack_id"
+                        }
+                    }
+                }
+            },
+            "cpu_alarm_low": {
+                "type": "OS::Ceilometer::Alarm",
+                "properties": {
+                    "meter_name": "cpu_util",
+                    "description": "Scale-down if the average CPU < #alarmdownthreshold% for #alarmdownperiod seconds",
+                    "statistic": "avg",
+                    "period": #alarmdownperiod,
+                    "comparison_operator": "lt",
+                    "evaluation_periods": 1,
+                    "threshold": #alarmdownthreshold,
+                    "alarm_actions": [
+                    #OSAlarmDownAttribute
+                    ],
+                    "matching_metadata": {
+                        "metadata.user_metadata.stack": {
+                            "Ref": "OS::stack_id"
+                        }
+                    }
+                }
+            }
+        },
+        "heat_template_version": "2013-05-23"
+    },
+    "disable_rollback": "true",
+    "stack_name": "#asgname"
+}
