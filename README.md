@@ -1,18 +1,16 @@
 # Groovy Project
-
 This is based on Netflix Aasgard Open Source Code. 
-
-The Main part was changed from Amazon AWS(Public cloud) to Openstack(Private cloud) for cluster.
-
+The Main part is changed from Amazon AWS(Public cloud) to Openstack(Private cloud) for cluster.
 This is not included fully.
 
+## Configuration
 
-Langunage     : Groovy 
+Langunage     : __Groovy__ 
 
-Web Framework : Grails
+Web Framework : __Grails__
 
-DB            : MongoDB
+DB            : __MongoDB__
 
-Host          : Tomcat
+Host          : __Tomcat___
 
-Cloud         : Openstack(using REST API)
+Cloud         : __Openstack__(using REST API)
