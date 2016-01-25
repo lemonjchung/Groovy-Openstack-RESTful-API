@@ -11,6 +11,6 @@ Web Framework : __Grails__
 
 DB            : __MongoDB__
 
-Host          : __Tomcat___
+Host          : __Tomcat__
 
 Cloud         : __Openstack__(using REST API)
