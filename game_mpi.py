@@ -59,6 +59,8 @@ def msgDn(subGrid):
 
 
 def computeGridPoints(subGrid):
+    generation = 0
+    for i in range(generations):
         generation = generation + 1
         print ("Generation = ",generation)
         intermediateM = numpy.copy(subGrid)
